@@ -1,0 +1,32 @@
+// ============================================================================
+//  Cloudflare Workers 部署配置（静态资源模式）
+// ----------------------------------------------------------------------------
+//  本博客是纯静态站（astro build 产物在 dist/），没有服务端逻辑，
+//  所以这里只声明「把 dist 目录当作静态资源上传」，不需要 main 入口。
+//
+//  Cloudflare 上对应的设置：
+//    构建命令   pnpm build
+//    部署命令   npx wrangler deploy
+//    输出目录   dist（Astro 默认）
+//    环境变量   NODE_VERSION=20
+//
+//  name 必须与 Cloudflare 上的 Worker 项目名一致，否则会新建一个新项目。
+// ============================================================================
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "spaceofp",
+	"compatibility_date": "2026-10-23",
+
+	// 静态资源：构建产物目录，以及路径处理方式
+	"assets": {
+		"directory": "./dist",
+
+		// 目录式 URL 的兜底：/posts/hello/ 会自动匹配到 /posts/hello/index.html
+		// （Astro 的 trailingSlash: "always" 依赖这个行为）
+		"html_handling": "auto-trailing-slash",
+
+		// 不存在的路径返回 404；本仓库暂未生成 404.html，
+		// 想自定义就新建 src/pages/404.astro，然后改成 "404-page"
+		"not_found_handling": "none"
+	}
+}

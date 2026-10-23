@@ -206,17 +206,29 @@ $$
 
 ## 七、部署
 
-构建产物在 `dist/`，是纯静态文件，推荐 **Cloudflare Pages**（免费、自带 CDN、自动 HTTPS）。
+构建产物在 `dist/`，是纯静态文件，免费托管即可。当前配置走 **Cloudflare Workers（静态资源模式）**，
+仓库根目录的 `wrangler.jsonc` 已经声明好了。
 
-1. 把仓库推到自己 GitHub
-2. Cloudflare Pages → 连接仓库
-3. 构建命令 `pnpm build`，输出目录 `dist`
-4. 绑定自己的域名
+**Cloudflare 上的设置**
 
-注意：**部署到自己的域名后，一定要把 `astro.config.mjs` 里的 `site` 改成实际地址**
-（如 `https://blog.example.com/`），否则 RSS 和 sitemap 里会是上游的示例域名。
+| 字段 | 值 |
+|---|---|
+| 构建命令 | `pnpm build` |
+| 部署命令 | `npx wrangler deploy` |
+| 输出目录 | `dist` |
+| 环境变量 | `NODE_VERSION=20` |
 
-如果部署在子路径（`example.com/blog/`），还要把 `base` 改成 `"/blog/"`。
+`wrangler.jsonc` 里的 `name` 必须和 Cloudflare 上的项目名一致（当前是 `spaceofp`），
+`assets.directory` 指向 `./dist`，`html_handling: auto-trailing-slash` 负责把
+`/posts/hello/` 解析到 `/posts/hello/index.html`。
+
+> 也可以用 **Cloudflare Pages**：创建时选 Pages 标签而不是 Workers，构建命令 `pnpm build`、
+> 输出目录 `dist` 即可，不需要 `wrangler.jsonc`。两条路产物一样。
+
+**域名**：`astro.config.mjs` 的 `site` 已指向 `https://blog.spaceofp.xyz/`。
+换域名时改这里并重新部署，否则 RSS / sitemap 里会是旧地址。
+
+如果部署在**子路径**（`example.com/blog/`）而不是子域名，还要把 `base` 改成 `"/blog/"`。
 
 ---
 
