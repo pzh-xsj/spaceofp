@@ -235,7 +235,29 @@ $$
 
 ---
 
-## 九、上游与许可
+## 九、本地补丁（与上游的差异）
+
+除了配置和文档，本仓库还有一处**代码修复**，用来解决部署时偶发的构建失败：
+
+`src/components/misc/ImageWrapper.astro` 里的 `import.meta.glob("../../**")` 原本会把 `src/` 下**所有文件**（含 `.css`、`.ts`）都当成图片导入，导致 `src/styles/markdown.css` 被单独送进 Tailwind 处理，报：
+
+```
+The `link` class does not exist. If `link` is a custom class,
+make sure it is defined within a `@layer` directive.
+```
+
+上游 issue：[saicaca/fuwari#766](https://github.com/saicaca/fuwari/issues/766)。修法是把 glob 限制成只匹配图片扩展名：
+
+```js
+import.meta.glob<ImageMetadata>(
+  "../../**/*.{png,jpg,jpeg,webp,avif,gif,svg,bmp,ico}",
+  { import: "default" },
+)
+```
+
+修完连续三次 `pnpm build` 都稳定通过。**同步上游时这个文件会冲突，保留本地版本。**
+
+## 十、上游与许可
 
 - 主题来源：[saicaca/fuwari](https://github.com/saicaca/fuwari)（MIT License）
 - 本文档与配置文件的中文注释为本地添加，不影响与上游的同步
