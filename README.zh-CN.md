@@ -3,6 +3,8 @@
 基于 [Fuwari](https://github.com/saicaca/fuwari)（Astro + Tailwind CSS）的个人静态博客。
 这份文档讲**你日常会改什么、在哪儿改**；上游项目本身的英文说明见 `README.md`。
 
+> 日常操作看 [`guide/`](./guide/README.md)：发布流程见 [publish.md](./guide/publish.md)，Markdown 写法与文章头字段见 [writing.md](./guide/writing.md)。
+
 - 技术栈：Astro 5 + Svelte 5 + Tailwind CSS 3
 - 构建产物：纯静态 HTML（`dist/`），可以放任何静态托管
 - 本地预览：http://localhost:4321
