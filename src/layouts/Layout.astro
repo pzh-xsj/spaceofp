@@ -3,6 +3,9 @@ import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 
+// 全局样式入口（内含 main.css / markdown.css 等，合成一次处理）
+import "../styles/global.css";
+
 import ConfigCarrier from "@components/ConfigCarrier.astro";
 import { profileConfig, siteConfig } from "@/config";
 import {
@@ -192,6 +195,12 @@ const bannerOffset =
 		@apply opacity-0 -translate-y-16
 	}
 }
+</style>
+
+<!-- Stylus 样式（颜色变量 + Markdown 扩展块），必须由 Stylus 编译 -->
+<style lang="stylus" is:global>
+@import "../styles/variables.styl"
+@import "../styles/markdown-extend.styl"
 </style>
 
 <script>

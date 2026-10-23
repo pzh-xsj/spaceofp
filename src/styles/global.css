@@ -1,0 +1,16 @@
+/*
+ * 全局样式入口（由 Layout.astro 引入）
+ *
+ * 为什么合成一个入口，而不是在 Layout.astro 里分别 import：
+ *   markdown.css 里用了 @apply link，而 .link 定义在 main.css 中。
+ *   Tailwind 的 @apply 只有在「同一个 PostCSS 处理过程」里才能找到它，
+ *   拆成多个入口会被分别处理，导致偶发的构建失败（上游 issue #766）。
+ *
+ * 引入顺序很重要：main.css 必须在 markdown.css 之前。
+ */
+@import "./main.css";
+@import "./markdown.css";
+@import "./scrollbar.css";
+@import "./transition.css";
+@import "./photoswipe.css";
+@import "./expressive-code.css";

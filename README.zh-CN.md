@@ -249,16 +249,26 @@ $$
 
 ## 九、本地补丁（与上游的差异）
 
-除了配置和文档，本仓库还有一处**代码修复**，用来解决部署时偶发的构建失败：
+本仓库对上游代码做了两处修复，用来解决**构建偶发失败**和**样式丢失**。
 
-`src/components/misc/ImageWrapper.astro` 里的 `import.meta.glob("../../**")` 原本会把 `src/` 下**所有文件**（含 `.css`、`.ts`）都当成图片导入，导致 `src/styles/markdown.css` 被单独送进 Tailwind 处理，报：
+### 问题
+
+`src/components/misc/ImageWrapper.astro` 里的 `import.meta.glob("../../**")` 会把 `src/` 下**所有文件**（含 `.css`、`.ts`）都当图片导入。副作用有两个：
+
+1. `src/styles/*.css` 被逐个送进 Tailwind 单独处理，`markdown.css` 里的 `@apply link` 找不到 `main.css` 里定义的 `.link`，构建**时好时坏**：
 
 ```
 The `link` class does not exist. If `link` is a custom class,
 make sure it is defined within a `@layer` directive.
 ```
 
-上游 issue：[saicaca/fuwari#766](https://github.com/saicaca/fuwari/issues/766)。修法是把 glob 限制成只匹配图片扩展名：
+2. 反过来，`src/styles` 里的样式其实是**靠这个 glob 才被打包进去的**——一旦收窄 glob，全站排版立刻塌掉（卡片、浮层、代码块样式全丢）。
+
+上游 issue：[saicaca/fuwari#766](https://github.com/saicaca/fuwari/issues/766)。
+
+### 修复
+
+**① 收窄 glob**（`ImageWrapper.astro`），只匹配图片：
 
 ```js
 import.meta.glob<ImageMetadata>(
@@ -267,7 +277,25 @@ import.meta.glob<ImageMetadata>(
 )
 ```
 
-修完连续三次 `pnpm build` 都稳定通过。**同步上游时这个文件会冲突，保留本地版本。**
+**② 显式引入样式**，替代原来被 glob 顺带打包的行为：
+
+- 新增 `src/styles/global.css`，用 `@import` 汇总 `main.css`、`markdown.css`、`scrollbar.css`、`transition.css`、`photoswipe.css`、`expressive-code.css`。
+  **必须合成一个入口**：`postcss-import` 会把它们内联成一份，Tailwind 才能在一次处理里找到 `.link`。
+- `src/layouts/Layout.astro` 里 `import "../styles/global.css"`。
+- 同样在 `Layout.astro` 加一个 Stylus 块，引入 `variables.styl`（颜色变量）和 `markdown-extend.styl`：
+
+```astro
+<style lang="stylus" is:global>
+@import "../styles/variables.styl"
+@import "../styles/markdown-extend.styl"
+</style>
+```
+
+改动文件：`ImageWrapper.astro`、`Layout.astro`、新增 `global.css`。
+
+验证：连续多次 `pnpm build` 全部通过，产物里 `.card-base` / `.float-panel` / `.custom-md` 等关键类齐全，页面排版正常。
+
+**同步上游时这些文件会冲突，保留本地版本。**
 
 ## 十、上游与许可
 
